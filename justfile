@@ -31,10 +31,10 @@ parser_generate:
 # Run NI with local BGEE
 [group('run')]
 run_bg1: build
-  java -jar NearInfinity.jar "/home/ufo/Temp/Games/BaldursGate/"
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/BaldursGate/"
 
 
 # Run NI with local BG2EE
 [group('run')]
 run_bg2: build
-  java -jar NearInfinity.jar "/home/ufo/Temp/Games/BaldursGate2/"
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/BaldursGate2/"

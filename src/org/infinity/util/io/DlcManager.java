@@ -23,7 +23,9 @@ import org.infinity.util.io.zip.DlcFileSystemProvider;
  */
 public class DlcManager {
   // list of supported KEY files
-  private static final String[] KEY_FILES = { "mod.key", "chitin.key" };
+//  private static final String[] KEY_FILES = { "mod.key", "chitin.key" };
+    // Disable mod.key as it creates lots of FileNotFound exceptions. I don't know why
+  private static final String[] KEY_FILES = { "chitin.key" };
 
   private static DlcManager instance;
 

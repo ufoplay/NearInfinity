@@ -32,7 +32,7 @@
            release="8"
            includeantruntime="false"
            deprecation="false"
-           debug="false"
+           debug="true"
            debuglevel="lines,vars,source"
            classpath="${classpath}:${tinylog-api.file}:${tinylog-impl.file}:${jorbis.file}:${rsyntaxtextarea.file}:${jhexview.file}:${montemedia.file}:${apng_writer.file}:${json.file}:${commonmark.file}:${flatlaf.file}:${flatlafthemes.file}">
       <!-- Various debugging options: -->

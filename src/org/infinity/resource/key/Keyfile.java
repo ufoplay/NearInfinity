@@ -498,7 +498,7 @@ public class Keyfile {
   // }
 
   /** Creates or updates cached biff maps and entry tables. */
-  private void init() throws IOException {
+  protected void init() throws IOException {
     if (getKeyfile() == null) {
       throw new NullPointerException();
     }
@@ -549,6 +549,7 @@ public class Keyfile {
         final boolean isDemo = (buffer.getInt(ofsBif) - ofsBif) == (numBif * 0x8)
             && (buffer.getInt(ofsBif + 4) - ofsBif) != (numBif * 0xc);
         final int biffEntrySize = isDemo ? 0x8 : 0xc;
+
 
         // processing BIFF entries
         for (int i = 0, ofs = ofsBif; i < numBif; i++, ofs += biffEntrySize) {

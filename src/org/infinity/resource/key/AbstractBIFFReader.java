@@ -186,7 +186,7 @@ public abstract class AbstractBIFFReader {  // implements AutoCloseable
     mapEntries.clear();
   }
 
-  private static Type detectBiffType(Path file) throws Exception {
+  public static Type detectBiffType(Path file) throws Exception {
     if (file == null) {
       throw new NullPointerException();
     }

@@ -84,7 +84,10 @@ public final class BIFFResourceEntry extends ResourceEntry implements Writeable 
     }
     this.extension = ext;
 
+
     this.locator = buffer.getInt();
+    int bif_index = getBIFFEntry().getIndex();
+      System.out.println("Resource " + this.resourceName + " " + ext + " " + bif_index);
   }
 
   // --------------------- Begin Interface Writeable ---------------------

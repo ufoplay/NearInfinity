@@ -200,6 +200,7 @@ public class BIFFEntry implements Writeable, Comparable<BIFFEntry> {
     short stringLength = buffer.getShort(offset + curOfs);
     curOfs += 2;
     this.location = buffer.getShort(offset + curOfs) & 0xffff;
+//      System.out.println("Location: " + location);
     curOfs += 2;
     this.fileName = StreamUtils.readString(buffer, this.stringOffset, stringLength - 1);
     if (this.fileName.charAt(0) == '\\') {
@@ -214,6 +215,7 @@ public class BIFFEntry implements Writeable, Comparable<BIFFEntry> {
     }
     this.fileName = this.fileName.replace(this.separatorChar, '/');
     this.biffFile = findBiffFile(this.keyFile.getParent(), this.location, this.fileName);
+      System.out.println("biffFile: " + biffFile);
 
     if (isDemo) {
       try {
@@ -238,6 +240,7 @@ public class BIFFEntry implements Writeable, Comparable<BIFFEntry> {
     Path retVal = null;
     if (root != null && fileName != null) {
       List<Path> biffFolders = new ArrayList<>(Profile.getProperty(Profile.Key.GET_GAME_BIFF_FOLDERS));
+        // System.out.println("biffFolders: " + biffFolders);
       if (Profile.isEnhancedEdition()) {
         // remove non-matching biff folder paths
         for (int idx = biffFolders.size() - 1; idx >= 0; idx--) {

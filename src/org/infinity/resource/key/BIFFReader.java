@@ -45,6 +45,9 @@ public class BIFFReader extends AbstractBIFFReader {
       this.numFiles = StreamUtils.readInt(channel);
       this.numTilesets = StreamUtils.readInt(channel);
       int ofsFiles = StreamUtils.readInt(channel);
+
+
+
       ByteBuffer bb = StreamUtils.getByteBuffer(this.numFiles * 0x10 + this.numTilesets * 0x14);
       channel.position(ofsFiles);
       channel.read(bb);
@@ -143,6 +146,7 @@ public class BIFFReader extends AbstractBIFFReader {
       int size = buffer.getInt();
       short type = buffer.getShort();
       buffer.getShort(); // unknown data
+//        System.out.println("file " + locator + " " + offset + " " + size + " " + type + " ");
       addEntry(new Entry(locator, offset, size, type));
     }
     // reading tileset entries
@@ -153,6 +157,7 @@ public class BIFFReader extends AbstractBIFFReader {
       int size = buffer.getInt();
       short type = buffer.getShort();
       buffer.getShort(); // unknown data
+//        System.out.println("tileset " + locator + " " + offset + " " + count + " " + size + " " + type + " ");
       addEntry(new Entry(locator, offset, count, size, type));
     }
   }

@@ -133,6 +133,9 @@ public class BIFReader extends AbstractBIFFReader {
       this.numFiles = StreamUtils.readInt(iis);
       this.numTilesets = StreamUtils.readInt(iis);
       int entryOfs = StreamUtils.readInt(iis);
+
+        System.out.println("numFiles " + this.numFiles + " numTilesets " + this.numTilesets + " entryOfs " + entryOfs );
+
       curOfs += 20;
       if (entryOfs < curOfs) {
         throw new Exception("Invalid decompressed BIFF header");
@@ -150,6 +153,7 @@ public class BIFReader extends AbstractBIFFReader {
         int size = StreamUtils.readInt(iis);
         short type = StreamUtils.readShort(iis);
         iis.skip(2); // unknown data
+          System.out.println("file " + locator + " " + offset + " " + size + " " + type + " ");
         addEntry(new Entry(locator, offset, size, type));
       }
 
@@ -161,6 +165,7 @@ public class BIFReader extends AbstractBIFFReader {
         int size = StreamUtils.readInt(iis);
         short type = StreamUtils.readShort(iis);
         iis.skip(2); // unknown data
+          System.out.println("tileset " + locator + " " + offset + " " + count + " " + size + " " + type + " ");
         addEntry(new Entry(locator, offset, count, size, type));
       }
     }

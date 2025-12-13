@@ -148,5 +148,7 @@
       </library>
     </orderEntry>
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="library" name="junit-4.13.2" level="project" />
+    <orderEntry type="library" name="hamcrest-all-1.3" level="project" />
   </component>
 </module>

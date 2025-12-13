@@ -28,13 +28,47 @@ parser_generate:
   ant parser-generate
 
 
-# Run NI with local BGEE
+# Run NI with local Baldur's Gate
 [group('run')]
-run_bg1: build
-  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/BaldursGate/"
+run_bg: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Baldur's Gate/"
 
+# Run NI with local Baldur's Gate - Enhanced Edition
+[group('run')]
+run_bgee: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Baldur's Gate - Enhanced Edition"
 
-# Run NI with local BG2EE
+# Run NI with local Baldur's Gate 2
 [group('run')]
 run_bg2: build
-  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/BaldursGate2/"
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Baldur's Gate 2/"
+
+# Run NI with local Baldur's Gate 2 - Enhanced Edition
+[group('run')]
+run_bg2ee: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Baldur's Gate 2 - Enhanced Edition"
+
+# Run NI with local Icewind Dale
+[group('run')]
+run_iwd: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Icewind Dale"
+
+# Run NI with local Icewind Dale - Enhanced Edition
+[group('run')]
+run_iwdee: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Icewind Dale - Enhanced Edition"
+
+# Run NI with local Icewind Dale 2
+[group('run')]
+run_iwd2: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Icewind Dale 2"
+
+# Run NI with local Planescape Torment
+[group('run')]
+run_pst: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Planescape Torment"
+
+# Run NI with local Planescape Torment - Enhanced Edition
+[group('run')]
+run_pstee: build
+  java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Planescape Torment - Enhanced Edition"

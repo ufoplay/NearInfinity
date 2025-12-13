@@ -20,6 +20,7 @@
   <property name="parser.path" value="org/infinity/resource/bcs/parser"/>
   <property name="src.parser.path" value="${src.path}/org/infinity/resource/bcs/parser"/>
   <property name="parser.file" value="BafParser"/>
+  <property name="junit.file" value="${lib.path.rel}/junit-4.13.2.jar"/>
 
   <target name="compile" depends="clean">
     <mkdir dir="${build.path}"/>
@@ -34,7 +35,7 @@
            deprecation="false"
            debug="true"
            debuglevel="lines,vars,source"
-           classpath="${classpath}:${tinylog-api.file}:${tinylog-impl.file}:${jorbis.file}:${rsyntaxtextarea.file}:${jhexview.file}:${montemedia.file}:${apng_writer.file}:${json.file}:${commonmark.file}:${flatlaf.file}:${flatlafthemes.file}">
+           classpath="${classpath}:${tinylog-api.file}:${tinylog-impl.file}:${jorbis.file}:${rsyntaxtextarea.file}:${jhexview.file}:${montemedia.file}:${apng_writer.file}:${json.file}:${junit.file}:${commonmark.file}:${flatlaf.file}:${flatlafthemes.file}">
       <!-- Various debugging options: -->
       <compilerarg value="-Xlint:cast"/>
       <compilerarg value="-Xlint:classfile"/>
@@ -74,6 +75,7 @@
       <zipgroupfileset dir="." includes="${montemedia.file}"/>
       <zipgroupfileset dir="." includes="${apng_writer.file}"/>
       <zipgroupfileset dir="." includes="${json.file}"/>
+      <zipgroupfileset dir="." includes="${junit.file}"/>
       <zipgroupfileset dir="." includes="${commonmark.file}"/>
       <zipgroupfileset dir="." includes="${flatlaf.file}"/>
       <zipgroupfileset dir="." includes="${flatlafthemes.file}"/>

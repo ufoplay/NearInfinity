@@ -22,7 +22,10 @@ import org.infinity.resource.ResourceFactory;
 import org.infinity.resource.bcs.Decompiler;
 import org.infinity.resource.graphics.BamDecoder;
 import org.infinity.resource.graphics.BamResource;
+import org.infinity.resource.graphics.ColorConvert;
 import org.infinity.resource.graphics.Compressor;
+import org.infinity.resource.graphics.MosDecoder;
+import org.infinity.resource.graphics.MosV1Decoder;
 import org.infinity.resource.graphics.PvrDecoder;
 import org.infinity.resource.graphics.decoder.PvrInfo;
 import org.infinity.resource.key.ResourceEntry;
@@ -33,12 +36,13 @@ import org.infinity.util.io.StreamUtils;
 /**
  * Headless extractor that reads a {@code chitin.key} and dumps every resource of a given type to disk.
  *
- * <p>For BCS resources the binary scripts are written under {@code <output>/bcs/original} and their
- * decompiled BAF sources under {@code <output>/bcs/source}. Other supported types are written
- * directly under {@code <output>/<type>/}.
+ * <p>For script resources (BCS, BS) the binary scripts are written under {@code <output>/<type>/original}
+ * and their decompiled BAF sources under {@code <output>/<type>/source}. Other supported types are
+ * written directly under {@code <output>/<type>/}.
  */
 public final class Extractor {
   private static final String TYPE_BCS = "bcs";
+  private static final String TYPE_BS = "bs";
   private static final String TYPE_2DA = "2da";
   private static final String TYPE_BMP = "bmp";
   private static final String TYPE_IDS = "ids";
@@ -46,9 +50,10 @@ public final class Extractor {
   private static final String TYPE_WED = "wed";
   private static final String TYPE_BAM = "bam";
   private static final String TYPE_PVRZ = "pvrz";
+  private static final String TYPE_MOS = "mos";
 
   private static final List<String> SUPPORTED_TYPES =
-      Arrays.asList(TYPE_BCS, TYPE_2DA, TYPE_BMP, TYPE_IDS, TYPE_INI, TYPE_WED, TYPE_BAM, TYPE_PVRZ);
+      Arrays.asList(TYPE_BCS, TYPE_BS, TYPE_2DA, TYPE_BMP, TYPE_IDS, TYPE_INI, TYPE_WED, TYPE_BAM, TYPE_PVRZ, TYPE_MOS);
 
   public static void main(String[] args) {
     if (args.length < 2 || args.length > 3) {
@@ -99,7 +104,10 @@ public final class Extractor {
   private static void extractType(Path outputRoot, String type) throws Exception {
     switch (type) {
       case TYPE_BCS:
-        extractBcs(outputRoot);
+        extractScript(outputRoot, TYPE_BCS);
+        break;
+      case TYPE_BS:
+        extractScript(outputRoot, TYPE_BS);
         break;
       case TYPE_2DA:
         extractSimple(outputRoot, TYPE_2DA, true);
@@ -122,6 +130,9 @@ public final class Extractor {
       case TYPE_PVRZ:
         extractPvrz(outputRoot);
         break;
+      case TYPE_MOS:
+        extractMos(outputRoot);
+        break;
       default:
         throw new IllegalStateException("Unhandled type: " + type);
     }
@@ -136,14 +147,15 @@ public final class Extractor {
     System.err.println("              If omitted, every supported type is extracted.");
   }
 
-  private static void extractBcs(Path outputRoot) throws Exception {
-    final List<ResourceEntry> entries = ResourceFactory.getResources("BCS");
+  private static void extractScript(Path outputRoot, String type) throws Exception {
+    final String upperType = type.toUpperCase(Locale.ENGLISH);
+    final List<ResourceEntry> entries = ResourceFactory.getResources(upperType);
     if (entries == null || entries.isEmpty()) {
-      System.out.println("No BCS resources found.");
+      System.out.println("No " + upperType + " resources found.");
       return;
     }
 
-    final Path typeDir = outputRoot.resolve(TYPE_BCS);
+    final Path typeDir = outputRoot.resolve(type);
     final Path originalDir = typeDir.resolve("original");
     final Path sourceDir = typeDir.resolve("source");
     Files.createDirectories(originalDir);
@@ -156,10 +168,10 @@ public final class Extractor {
     for (final ResourceEntry entry : entries) {
       idx++;
       final String name = entry.getResourceRef();
-      System.out.println("[" + idx + "/" + total + "] " + name + ".bcs");
+      System.out.println("[" + idx + "/" + total + "] " + name + "." + type);
       try {
         final ByteBuffer buffer = entry.getResourceBuffer();
-        writeBuffer(originalDir.resolve(name + ".bcs"), buffer);
+        writeBuffer(originalDir.resolve(name + "." + type), buffer);
 
         final ByteBuffer code = maybeDecrypt(buffer);
         final String text = StreamUtils.readString(code, 0, code.limit(), charset);
@@ -173,7 +185,7 @@ public final class Extractor {
       }
     }
 
-    System.out.println("Extracted " + (total - failures) + "/" + total + " BCS resources to " + typeDir);
+    System.out.println("Extracted " + (total - failures) + "/" + total + " " + upperType + " resources to " + typeDir);
     if (failures > 0) {
       System.err.println(failures + " resource(s) failed to extract.");
     }
@@ -239,15 +251,20 @@ public final class Extractor {
         }
         System.out.println("[" + idx + "/" + total + "] " + name + ".bam (" + groupName + ")");
 
-        final Path bamDir = rootDir.resolve(groupName).resolve(name);
-        Files.createDirectories(bamDir);
+        final Path groupDir = rootDir.resolve(groupName);
+        final Path originalDir = groupDir.resolve("original");
+        final Path pngDir = groupDir.resolve("png");
+        Files.createDirectories(originalDir);
+        Files.createDirectories(pngDir);
 
         final ByteBuffer original = entry.getResourceBuffer();
-        writeBuffer(bamDir.resolve(name + ".bam"), original);
+        writeBuffer(originalDir.resolve(name + ".bam"), original);
 
         if (bamType == BamDecoder.Type.BAMC) {
+          final Path decompressedDir = groupDir.resolve("decompressed");
+          Files.createDirectories(decompressedDir);
           final ByteBuffer decompressed = Compressor.decompress(original.duplicate());
-          writeBuffer(bamDir.resolve(name + "_decompressed.bam"), decompressed);
+          writeBuffer(decompressedDir.resolve(name + ".bam"), decompressed);
         }
 
         final BamDecoder decoder = BamDecoder.loadBam(entry);
@@ -255,7 +272,7 @@ public final class Extractor {
           throw new IOException("Failed to load BAM decoder");
         }
         try {
-          BamResource.exportFrames(decoder, bamDir, name + "_", ".png", "png", true);
+          BamResource.exportFrames(decoder, pngDir, name + "_", ".png", "png", true);
         } finally {
           decoder.close();
         }
@@ -312,19 +329,25 @@ public final class Extractor {
         }
         final PvrInfo info = decoder.getInfo();
         final PvrInfo.PixelFormat pixelFormat = info.getPixelFormat();
-        final String groupName = pixelFormat != null ? pixelFormat.name() : "UNKNOWN";
+        final String groupName = (pixelFormat != null ? pixelFormat.name() : "unknown")
+            .toLowerCase(Locale.ENGLISH);
         System.out.println("[" + idx + "/" + total + "] " + name + ".pvrz (" + groupName + ")");
 
-        final Path pvrzDir = rootDir.resolve(groupName).resolve(name);
-        Files.createDirectories(pvrzDir);
+        final Path groupDir = rootDir.resolve(groupName);
+        final Path originalDir = groupDir.resolve("original");
+        final Path decompressedDir = groupDir.resolve("decompressed");
+        final Path pngDir = groupDir.resolve("png");
+        Files.createDirectories(originalDir);
+        Files.createDirectories(decompressedDir);
+        Files.createDirectories(pngDir);
 
-        writeBuffer(pvrzDir.resolve(name + ".pvrz"), original);
-        writeBuffer(pvrzDir.resolve(name + "_decompressed.pvr"), decompressed);
+        writeBuffer(originalDir.resolve(name + ".pvrz"), original);
+        writeBuffer(decompressedDir.resolve(name + ".pvr"), decompressed);
 
         try {
           final BufferedImage image = new BufferedImage(info.getWidth(), info.getHeight(), BufferedImage.TYPE_INT_ARGB);
           if (decoder.decode(image)) {
-            ImageIO.write(image, "png", pvrzDir.resolve(name + ".png").toFile());
+            ImageIO.write(image, "png", pngDir.resolve(name + ".png").toFile());
           } else {
             System.err.println("  PNG skipped: decoder reported failure for format " + groupName);
           }
@@ -340,6 +363,87 @@ public final class Extractor {
     System.out.println("Extracted " + (total - failures) + "/" + total + " PVRZ resources to " + rootDir);
     if (failures > 0) {
       System.err.println(failures + " resource(s) failed to extract.");
+    }
+  }
+
+  private static void extractMos(Path outputRoot) throws Exception {
+    final List<ResourceEntry> entries = ResourceFactory.getResources("MOS");
+    if (entries == null || entries.isEmpty()) {
+      System.out.println("No MOS resources found.");
+      return;
+    }
+
+    final Path typeDir = outputRoot.resolve(TYPE_MOS);
+    Files.createDirectories(typeDir);
+
+    final int total = entries.size();
+    int idx = 0;
+    int failures = 0;
+    for (final ResourceEntry entry : entries) {
+      idx++;
+      final String name = entry.getResourceRef();
+      try {
+        final MosDecoder.Type mosType = MosDecoder.getType(entry);
+        final String groupName = mosGroupName(mosType);
+        if (groupName == null) {
+          throw new IOException("Not a recognized MOS resource (type=" + mosType + ")");
+        }
+        System.out.println("[" + idx + "/" + total + "] " + name + ".mos (" + groupName + ")");
+
+        final Path groupDir = typeDir.resolve(groupName);
+        final Path originalDir = groupDir.resolve("original");
+        final Path pngDir = groupDir.resolve("png");
+        Files.createDirectories(originalDir);
+        Files.createDirectories(pngDir);
+
+        final ByteBuffer original = entry.getResourceBuffer();
+        writeBuffer(originalDir.resolve(name + ".mos"), original);
+
+        if (mosType == MosDecoder.Type.MOSC) {
+          final Path decompressedDir = groupDir.resolve("decompressed");
+          Files.createDirectories(decompressedDir);
+          final ByteBuffer decompressed = Compressor.decompress(original.duplicate());
+          writeBuffer(decompressedDir.resolve(name + ".mos"), decompressed);
+        }
+
+        final MosDecoder decoder = MosDecoder.loadMos(entry);
+        if (decoder == null) {
+          throw new IOException("Failed to load MOS decoder");
+        }
+        try {
+          if (decoder instanceof MosV1Decoder) {
+            ((MosV1Decoder) decoder).setTransparencyEnabled(true);
+          }
+          final BufferedImage image = ColorConvert.toBufferedImage(decoder.getImage(), true);
+          if (image == null) {
+            throw new IOException("Decoder produced no image");
+          }
+          ImageIO.write(image, "png", pngDir.resolve(name + ".png").toFile());
+        } finally {
+          decoder.close();
+          PvrDecoder.flushCache();
+        }
+      } catch (Exception e) {
+        failures++;
+        System.err.println("[" + idx + "/" + total + "] " + name + ".mos failed: " + e.getMessage());
+      }
+    }
+
+    System.out.println("Extracted " + (total - failures) + "/" + total + " MOS resources to " + typeDir);
+    if (failures > 0) {
+      System.err.println(failures + " resource(s) failed to extract.");
+    }
+  }
+
+  private static String mosGroupName(MosDecoder.Type type) {
+    if (type == null) {
+      return null;
+    }
+    switch (type) {
+      case MOSV1: return "mos_v1";
+      case MOSV2: return "mos_v2";
+      case MOSC:  return "mosc";
+      default:    return null;
     }
   }
 

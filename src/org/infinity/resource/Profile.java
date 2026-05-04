@@ -2049,7 +2049,9 @@ public final class Profile {
     // Considering three (or four) different root folders to locate game resources
     // Note: Order of the root directories is important. FileNI will take the first one available.
     Path homeRoot = null;
-    Bookmark bookmark = BrowserMenuBar.getInstance().getGameMenu().getBookmarkOf(getChitinKey());
+    Bookmark bookmark = BrowserMenuBar.isInstantiated()
+        ? BrowserMenuBar.getInstance().getGameMenu().getBookmarkOf(getChitinKey())
+        : null;
     if (bookmark != null && bookmark.getHomePath() != null) {
       final Path path = FileManager.resolve(bookmark.getHomePath());
       if (path != null && Files.isDirectory(path)) {

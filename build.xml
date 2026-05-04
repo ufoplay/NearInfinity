@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="NearInfinity" default="compile" basedir=".">
   <property name="jar.file" value="NearInfinity.jar"/>
+  <property name="extractor.jar.file" value="Extractor.jar"/>
   <property name="build.path" location="build/src"/>
   <property name="src.path" location="src"/>
   <property name="lib.path.rel" value="lib"/>
@@ -83,6 +84,27 @@
         <attribute name="Main-Class" value="org.infinity.NearInfinity"/>
       </manifest>
     </jar>
+
+    <jar destfile="${extractor.jar.file}"
+         basedir="${build.path}"
+         includes="**/*"
+         level="9">
+      <zipgroupfileset dir="." includes="${tinylog-api.file}"/>
+      <zipgroupfileset dir="." includes="${tinylog-impl.file}"/>
+      <zipgroupfileset dir="." includes="${jorbis.file}"/>
+      <zipgroupfileset dir="." includes="${rsyntaxtextarea.file}"/>
+      <zipgroupfileset dir="." includes="${jhexview.file}"/>
+      <zipgroupfileset dir="." includes="${montemedia.file}"/>
+      <zipgroupfileset dir="." includes="${apng_writer.file}"/>
+      <zipgroupfileset dir="." includes="${json.file}"/>
+      <zipgroupfileset dir="." includes="${junit.file}"/>
+      <zipgroupfileset dir="." includes="${commonmark.file}"/>
+      <zipgroupfileset dir="." includes="${flatlaf.file}"/>
+      <zipgroupfileset dir="." includes="${flatlafthemes.file}"/>
+      <manifest>
+        <attribute name="Main-Class" value="org.infinity.Extractor"/>
+      </manifest>
+    </jar>
   </target>
 
   <target name="parser-generate" depends="parser-clean">
@@ -93,6 +115,7 @@
   <target name="clean">
     <delete dir="${build.path}"/>
     <delete file="${jar.file}"/>
+    <delete file="${extractor.jar.file}"/>
     <delete>
       <fileset dir="${src.path}" includes="**/*.class"/>
     </delete>

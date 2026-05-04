@@ -72,3 +72,8 @@ run_pst: build
 [group('run')]
 run_pstee: build
   java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Planescape Torment - Enhanced Edition"
+
+# Extract the resources of a game
+[group('extract')]
+extract_resources: build
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate/" "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg" bcs

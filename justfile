@@ -74,6 +74,17 @@ run_pstee: build
   java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Planescape Torment - Enhanced Edition"
 
 # Extract the resources of a game
+# If type is not provided, all resources are extracted
 [group('extract')]
-extract_resources: build
-  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate/" "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg" bcs
+extract_resources type="": build
+  # Usage: java -jar Extractor.jar <gameRoot> <output> <bcs|2da|bmp|ids|ini|wed|bam|pvrz>
+  # If type is not provided, all resources are extracted
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate/"                         "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate - Enhanced Edition/"      "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bgee" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate 2/"                       "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg2" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate 2 - Enhanced Edition/"    "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg2ee" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale/"                          "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwd" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale - Enhanced Edition/"       "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwdee" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale 2/"                        "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwd2" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Planescape Torment/"                    "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/pst" {{type}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Planescape Torment - Enhanced Edition/" "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/pstee" {{type}}

@@ -17,6 +17,9 @@ import java.util.Locale;
 import org.infinity.resource.Profile;
 import org.infinity.resource.ResourceFactory;
 import org.infinity.resource.bcs.Decompiler;
+import org.infinity.resource.graphics.BamDecoder;
+import org.infinity.resource.graphics.BamResource;
+import org.infinity.resource.graphics.Compressor;
 import org.infinity.resource.key.ResourceEntry;
 import org.infinity.util.StaticSimpleXorDecryptor;
 import org.infinity.util.io.FileManager;
@@ -36,9 +39,10 @@ public final class Extractor {
   private static final String TYPE_IDS = "ids";
   private static final String TYPE_INI = "ini";
   private static final String TYPE_WED = "wed";
+  private static final String TYPE_BAM = "bam";
 
   private static final List<String> SUPPORTED_TYPES =
-      Arrays.asList(TYPE_BCS, TYPE_2DA, TYPE_BMP, TYPE_IDS, TYPE_INI, TYPE_WED);
+      Arrays.asList(TYPE_BCS, TYPE_2DA, TYPE_BMP, TYPE_IDS, TYPE_INI, TYPE_WED, TYPE_BAM);
 
   public static void main(String[] args) {
     if (args.length != 3) {
@@ -85,6 +89,9 @@ public final class Extractor {
           break;
         case TYPE_WED:
           extractSimple(outputRoot, TYPE_WED, false);
+          break;
+        case TYPE_BAM:
+          extractBam(outputRoot);
           break;
         default:
           throw new IllegalStateException("Unhandled type: " + type);
@@ -179,6 +186,74 @@ public final class Extractor {
     System.out.println("Extracted " + (total - failures) + "/" + total + " " + upperType + " resources to " + typeDir);
     if (failures > 0) {
       System.err.println(failures + " resource(s) failed to extract.");
+    }
+  }
+
+  private static void extractBam(Path outputRoot) throws Exception {
+    final Path rootDir = outputRoot.resolve(TYPE_BAM);
+    Files.createDirectories(rootDir);
+
+    final List<ResourceEntry> entries = ResourceFactory.getResources("BAM");
+    if (entries == null || entries.isEmpty()) {
+      System.out.println("No BAM resources found.");
+      return;
+    }
+
+    final int total = entries.size();
+    int idx = 0;
+    int failures = 0;
+    for (final ResourceEntry entry : entries) {
+      idx++;
+      final String name = entry.getResourceRef();
+      try {
+        final BamDecoder.Type bamType = BamDecoder.getType(entry);
+        final String groupName = bamGroupName(bamType);
+        if (groupName == null) {
+          throw new IOException("Not a recognized BAM resource (type=" + bamType + ")");
+        }
+        System.out.println("[" + idx + "/" + total + "] " + name + ".bam (" + groupName + ")");
+
+        final Path bamDir = rootDir.resolve(groupName).resolve(name);
+        Files.createDirectories(bamDir);
+
+        final ByteBuffer original = entry.getResourceBuffer();
+        writeBuffer(bamDir.resolve(name + ".bam"), original);
+
+        if (bamType == BamDecoder.Type.BAMC) {
+          final ByteBuffer decompressed = Compressor.decompress(original.duplicate());
+          writeBuffer(bamDir.resolve(name + "_decompressed.bam"), decompressed);
+        }
+
+        final BamDecoder decoder = BamDecoder.loadBam(entry);
+        if (decoder == null) {
+          throw new IOException("Failed to load BAM decoder");
+        }
+        try {
+          BamResource.exportFrames(decoder, bamDir, name + "_", ".png", "png", true);
+        } finally {
+          decoder.close();
+        }
+      } catch (Exception e) {
+        failures++;
+        System.err.println("[" + idx + "/" + total + "] " + name + ".bam failed: " + e.getMessage());
+      }
+    }
+
+    System.out.println("Extracted " + (total - failures) + "/" + total + " BAM resources to " + rootDir);
+    if (failures > 0) {
+      System.err.println(failures + " resource(s) failed to extract.");
+    }
+  }
+
+  private static String bamGroupName(BamDecoder.Type type) {
+    if (type == null) {
+      return null;
+    }
+    switch (type) {
+      case BAMV1: return "bam_v1";
+      case BAMV2: return "bam_v2";
+      case BAMC:  return "bamc";
+      default:    return null;
     }
   }
 

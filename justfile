@@ -74,17 +74,24 @@ run_pstee: build
   java -jar NearInfinity.jar -i "/home/ufo/Temp/Games/Planescape Torment - Enhanced Edition"
 
 # Extract the resources of a game
-# If type is not provided, all resources are extracted
+# Pass a comma-separated type list (e.g. types="are,acm"), or leave empty to extract everything.
 [group('extract')]
-extract_resources type="": build
-  # Usage: java -jar Extractor.jar <gameRoot> <output> <2da|bam|bcs|bmp|bs|ids|ini|mos|pvrz|wed>
-  # If type is not provided, all resources are extracted
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate/"                         "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg" {{type}}
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate - Enhanced Edition/"      "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bgee" {{type}}
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate 2/"                       "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg2" {{type}}
-  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate 2 - Enhanced Edition/"    "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg2ee" {{type}}
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale/"                          "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwd" {{type}}
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale - Enhanced Edition/"       "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwdee" {{type}}
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale 2/"                        "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwd2" {{type}}
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Planescape Torment/"                    "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/pst" {{type}}
-  #java -jar Extractor.jar "/home/ufo/Temp/Games/Planescape Torment - Enhanced Edition/" "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/pstee" {{type}}
+extract_resources types="" mode="--decode": build
+  # Usage: java -jar Extractor.jar <gameRoot> <output> (--type <list>|--all-types) [--raw|--decode]
+  # types: comma-separated list, e.g. "are,acm". Any of 2da, acm, are, bah, bam, bcs, bio, bmp,
+  #        bs, chr, chu, cre, dlg, eff, fnt, gam, glsl, gui, ids, ini, itm, lua, maze, menu, mos,
+  #        mus, mve, plt, png, pro, pvrz, spl, sql, src, sto, tis, toh, tot, ttf, vef, vvc, wav,
+  #        wbm, wed, wfx, wmp. Empty => --all-types.
+  # mode:  --decode (default) decodes supported formats; --raw writes bytes verbatim.
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ -z "{{types}}" ]; then SELECT="--all-types"; else SELECT="--type {{types}}"; fi
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate/"                         "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate - Enhanced Edition/"      "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bgee" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate 2/"                       "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg2" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Baldur's Gate 2 - Enhanced Edition/"    "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/bg2ee" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale/"                          "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwd" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale - Enhanced Edition/"       "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwdee" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Icewind Dale 2/"                        "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/iwd2" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Planescape Torment/"                    "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/pst" $SELECT {{mode}}
+  java -jar Extractor.jar "/home/ufo/Temp/Games/Planescape Torment - Enhanced Edition/" "/home/ufo/workspaces/github_ufoscout/baldurs_gate/extracted_resources/pstee" $SELECT {{mode}}
